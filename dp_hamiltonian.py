@@ -8,9 +8,7 @@ def generate_hamiltonian(event: em.event, params: dict):
     lambda_val = params.get('lambda')
     alpha = params.get('alpha')
     beta = params.get('beta')
-    theta = params.get('theta')
 
-    # First generate the segments from subsequent detectors
     modules = copy.deepcopy(event.modules)
     modules.sort(key=lambda a: a.z)
 
@@ -28,32 +26,41 @@ def generate_hamiltonian(event: em.event, params: dict):
 
     for (i, seg_i), (j, seg_j) in itertools.product(enumerate(segments), repeat=2):
         if i != j:
-            print(type(seg_j.from_hit))
             r_ab = np.sqrt((seg_j.from_hit.x - seg_i.from_hit.x) ** 2 + (seg_j.from_hit.y - seg_i.from_hit.y) ** 2 + (
-                        seg_j.from_hit.z - seg_i.from_hit.z) ** 2)
+                    seg_j.from_hit.z - seg_i.from_hit.z) ** 2)
             r_bc = np.sqrt((seg_j.to_hit.x - seg_i.to_hit.x) ** 2 + (seg_j.to_hit.y - seg_i.to_hit.y) ** 2 + (
-                        seg_j.to_hit.z - seg_i.to_hit.z) ** 2)
+                    seg_j.to_hit.z - seg_i.to_hit.z) ** 2)
             r_ac = np.sqrt((seg_j.to_hit.x - seg_i.from_hit.x) ** 2 + (seg_j.to_hit.y - seg_i.from_hit.y) ** 2 + (
-                        seg_j.to_hit.z - seg_i.from_hit.z) ** 2)
+                    seg_j.to_hit.z - seg_i.from_hit.z) ** 2)
             r_cb = np.sqrt((seg_j.from_hit.x - seg_i.to_hit.x) ** 2 + (seg_j.from_hit.y - seg_i.to_hit.y) ** 2 + (
-                        seg_j.from_hit.z - seg_i.to_hit.z) ** 2)
+                    seg_j.from_hit.z - seg_i.to_hit.z) ** 2)
 
             s_ab = s_bc = 1
             if seg_i.to_hit == seg_j.from_hit:
                 s_bc = -1
             if seg_i.from_hit == seg_j.to_hit:
                 s_ab = -1
-            print(f"theta: {theta}, lambda_val: {lambda_val}")
-            # Define the values for cosine
-            if r_ab + r_bc != 0:
-                cos_val = np.cos(lambda_val * theta * (r_ab + r_bc))
-            else:
-                cos_val = 0
-            # Add terms to the matrices
-            A[i, j] = -0.5 * cos_val * s_ab * s_bc / (r_ab + r_bc)
-            A[j, i] = A[i, j]
-            b[i] += alpha * s_ab * s_bc / (r_ac * r_cb)
-            b[j] += alpha * s_ab * s_bc / (r_ac * r_cb)
+
+            # Define the values for theta
+            hit_from_i = seg_i.from_hit
+            hit_from_j = seg_j.from_hit
+            hit_to_i = seg_i.to_hit
+            hit_to_j = seg_j.to_hit
+            if i != j:
+                if (hit_from_i == hit_to_j) or (hit_from_j == hit_to_i):
+                    vect_i = seg_i.to_vect()
+                    vect_j = seg_j.to_vect()
+                    theta = np.arccos(np.dot(vect_i, vect_j) / (np.linalg.norm(vect_i) * np.linalg.norm(vect_j)))
+
+                    # Define the values for cosine
+
+                    cos_val = np.cos(lambda_val * theta * (r_ab + r_bc))
+
+                    # Add terms to the matrices
+                    A[i, j] = -0.5 * cos_val * s_ab * s_bc / (r_ab + r_bc)
+                    A[j, i] = A[i, j]
+                    b[i] += alpha * s_ab * s_bc / (r_ac * r_cb)
+                    b[j] += alpha * s_ab * s_bc / (r_ac * r_cb)
 
     sum_ab = sum([seg.to_hit.module_id == 1 for seg in segments])
     A -= beta * (np.sum(A) - N) ** 2 / N ** 2
