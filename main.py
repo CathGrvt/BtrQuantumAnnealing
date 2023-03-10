@@ -2,6 +2,8 @@ import toymodel_3d as toy
 import dp_hamiltonian as ham
 import numpy as np
 import matplotlib.pyplot as plt
+import dimod
+
 
 N_MODULES = 3
 N_TRACKS = 2
@@ -26,7 +28,6 @@ plt.show()
 params = {
     'alpha': 0.0,
     'beta': 1.0,
-    'theta': 1e-9,
     'lambda': 100.0,
 }
 A, b, components, segments = ham.generate_hamiltonian(event, params)
@@ -46,4 +47,3 @@ ax.axis('off')
 ax.set_title(f"{len(segments)} segments generated")
 
 plt.show()
-

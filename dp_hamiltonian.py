@@ -50,17 +50,28 @@ def generate_hamiltonian(event: em.event, params: dict):
                 if (hit_from_i == hit_to_j) or (hit_from_j == hit_to_i):
                     vect_i = seg_i.to_vect()
                     vect_j = seg_j.to_vect()
-                    theta = np.arccos(np.dot(vect_i, vect_j) / (np.linalg.norm(vect_i) * np.linalg.norm(vect_j)))
+                    cosine = np.dot(vect_i,vect_j)/(np.linalg.norm(vect_i)*np.linalg.norm(vect_j))
 
                     # Define the values for cosine
+                    eps = 1e-6
 
-                    cos_val = np.cos(lambda_val * theta * (r_ab + r_bc))
+                    if np.abs(cosine-1) < eps:
+                        cos_val = 1.0
+                        theta = 0.0
+                    else:
+                        theta = np.arccos(cosine)
+                        cos_val = np.cos(lambda_val * theta * (r_ab + r_bc))
+                        print(theta)
+                    
 
                     # Add terms to the matrices
                     A[i, j] = -0.5 * cos_val * s_ab * s_bc / (r_ab + r_bc)
                     A[j, i] = A[i, j]
-                    b[i] += alpha * s_ab * s_bc / (r_ac * r_cb)
-                    b[j] += alpha * s_ab * s_bc / (r_ac * r_cb)
+                    if r_ac != 0 and r_cb != 0:
+                        b[i] += alpha * s_ab * s_bc / (r_ac * r_cb)
+                        b[j] += alpha * s_ab * s_bc / (r_ac * r_cb)
+
+
 
     sum_ab = sum([seg.to_hit.module_id == 1 for seg in segments])
     A -= beta * (np.sum(A) - N) ** 2 / N ** 2
