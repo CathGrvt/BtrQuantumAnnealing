@@ -61,7 +61,6 @@ def generate_hamiltonian(event: em.event, params: dict):
                     else:
                         theta = np.arccos(cosine)
                         cos_val = np.cos(lambda_val * theta * (r_ab + r_bc))
-                        print(theta)
                     
 
                     # Add terms to the matrices

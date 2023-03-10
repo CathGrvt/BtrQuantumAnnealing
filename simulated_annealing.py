@@ -3,12 +3,10 @@ import dp_hamiltonian as ham
 import numpy as np
 import matplotlib.pyplot as plt
 import dimod
-from dwave.samplers import SimulatedAnnealingSampler
 
-sampler = SimulatedAnnealingSampler()
 
 N_MODULES = 3
-N_TRACKS = 3
+N_TRACKS = 2
 
 LX = 2
 LY = 2
@@ -29,7 +27,7 @@ plt.show()
 
 params = {
     'alpha': 0.0,
-    'beta': 1.0,
+    'beta': 0.0,
     'lambda': 100.0,
 }
 A, b, components, segments = ham.generate_hamiltonian(event, params)
@@ -57,7 +55,9 @@ sampler = dimod.SimulatedAnnealingSampler()
 # Run simulated annealing and retrieve the best sample
 response = sampler.sample(bqm, num_reads=1000)
 best_sample = response.record.sample[0]
+print(best_sample)
+print(response.first.energy)
 
-sampleset = sampler.sample(bqm)
-sampleset = sampler.sample(bqm, beta_range=[.1, 4.2], beta_schedule_type='linear')
+# testing with diffent number of reads
+sampleset = sampler.sample(bqm, num_reads = 10 )
 print(sampleset.first.energy)
