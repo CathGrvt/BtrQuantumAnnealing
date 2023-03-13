@@ -56,15 +56,15 @@ def generate_hamiltonian(event: em.event, params: dict):
                     eps = 1e-9
 
                     if np.abs(cosine-1) < eps:
-                        cos_val = 1.0
+                        cosine = 1.0
                         theta = 0.0
                     else:
                         theta = np.arccos(cosine)
-                        cos_val = np.cos(theta)
+                        cos_val = cosine**lambda_val
                     
 
                     # Add terms to the matrices
-                    A[i, j] = -0.5 * cos_val * s_ab * s_bc / (r_ab + r_bc)
+                    A[i, j] = -0.5 * cosine * s_ab * s_bc # / (r_ab + r_bc)
                     A[j, i] = A[i, j]
                     if r_ac != 0 and r_cb != 0:
                         b[i] += alpha * s_ab * s_bc / (r_ac * r_cb)
