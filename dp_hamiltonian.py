@@ -51,6 +51,8 @@ def generate_hamiltonian(event: em.event, params: dict):
                     vect_i = seg_i.to_vect()
                     vect_j = seg_j.to_vect()
                     cosine = np.dot(vect_i,vect_j)/(np.linalg.norm(vect_i)*np.linalg.norm(vect_j))
+                    cos_val = cosine**lambda_val
+
 
                     # Define the values for cosine
                     eps = 1e-9
@@ -60,7 +62,6 @@ def generate_hamiltonian(event: em.event, params: dict):
                         theta = 0.0
                     else:
                         theta = np.arccos(cosine)
-                        cos_val = cosine**lambda_val
                     
 
                     # Add terms to the matrices
