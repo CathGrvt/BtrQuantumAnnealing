@@ -26,7 +26,7 @@ ax.set_title(f"Generated event\n{len(event.modules)} modules\n{len(event.tracks)
 plt.show()
 
 params = {
-    'alpha': 0.0,
+    'alpha': 86.20,
     'beta': 0.0,
     'lambda': 100.0,
 }
