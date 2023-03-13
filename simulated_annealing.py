@@ -6,7 +6,7 @@ import dimod
 
 
 N_MODULES = 3
-N_TRACKS = 2
+N_TRACKS = 3
 
 LX = 2
 LY = 2
@@ -49,7 +49,9 @@ ax.set_title(f"{len(segments)} segments generated")
 plt.show()
 
 # Define the BQM and sampler for simulated annealing
-bqm = dimod.BinaryQuadraticModel.from_qubo(A)
+offset = 0.0
+vartype = dimod.BINARY
+bqm= dimod.BinaryQuadraticModel(b, A, offset, vartype)
 sampler = dimod.SimulatedAnnealingSampler()
 
 # Run simulated annealing and retrieve the best sample
@@ -58,6 +60,25 @@ best_sample = response.record.sample[0]
 print(best_sample)
 print(response.first.energy)
 
-# testing with diffent number of reads
-sampleset = sampler.sample(bqm, num_reads = 10 )
-print(sampleset.first.energy)
+
+# Use the solution vector to select the corresponding segments from the event
+solution_segments = [seg for sol, seg in zip(best_sample, segments) if sol == 1]
+
+# Check if there are any segments in the solution
+if len(solution_segments) == 0:
+    print("No segments included in the solution.")
+else:
+    # Display the solution
+    fig = plt.figure()
+    fig.set_size_inches(12, 6)
+    ax = plt.axes(projection='3d')
+    event.display(ax, show_tracks=False)
+
+    for segment in solution_segments:
+        segment.display(ax)
+
+    ax.view_init(vertical_axis='y')
+    fig.set_tight_layout(True)
+    ax.axis('off')
+    ax.set_title(f"Solution")
+    plt.show()
