@@ -3,7 +3,7 @@ import dp_hamiltonian as ham
 import numpy as np
 import matplotlib.pyplot as plt
 import dimod
-
+from dwave.cloud import Client
 
 N_MODULES = 3
 N_TRACKS = 3
@@ -26,7 +26,7 @@ ax.set_title(f"Generated event\n{len(event.modules)} modules\n{len(event.tracks)
 plt.show()
 
 params = {
-    'alpha': 0.1,
+    'alpha': 0.0,
     'beta': 0.0,
     'lambda': 100.0,
 }
@@ -48,35 +48,30 @@ ax.set_title(f"{len(segments)} segments generated")
 
 plt.show()
 
-fig, axs = plt.subplots(2,3)
-fig.set_size_inches(10,6)
-vmin = np.min([A.min()].extend(components[key].min() for key in components))
-vmax = np.max([A.max()].extend(components[key].max() for key in components))
-im = axs[0,0].matshow(A,vmin=vmin, vmax=vmax)
-axs[0,0].set_title("A")
-
-axs_raviter = iter(axs.ravel())
-next(axs_raviter)
-for key in components:
-    ax = next(axs_raviter)
-    ax.matshow(components[key],vmin=vmin, vmax=vmax)
-    ax.set_title(key)
-
-fig.colorbar(im, ax=axs.ravel().tolist())
-
-
-# Define the BQM and sampler for simulated annealing
+# Define the BQM and sampler for quantum annealing using Dwave
 offset = 0.0
 vartype = dimod.BINARY
-bqm= dimod.BinaryQuadraticModel(b, A, offset, vartype)
-sampler = dimod.SimulatedAnnealingSampler()
+bqm = dimod.BinaryQuadraticModel(b, A, offset, vartype)
+client = Client.from_config()
+sampler = client.get_sampler()
 
-# Run simulated annealing and retrieve the best sample
-response = sampler.sample(bqm, num_reads=1000)
+# Set the solver parameters and credentials
+solver = 'Advantage_system1.1'
+params = {
+    'num_reads': 1000,
+    'auto_scale': True,
+    'num_spin_reversal_transforms': 10,
+    'postprocess': 'optimization',
+    'answer_mode': 'raw',
+    'anneal_schedule': [[0.0, 1.0], [5.0, 0.5], [5.5, 0.5], [6.0, 1.0]],
+}
+sampler = client.get_sampler(solver=solver)
+sampler = EmbeddingComposite(sampler)
+
+# Run quantum annealing and retrieve the best sample
+response = sampler.sample(bqm, **params)
 best_sample = response.record.sample[0]
 print(best_sample)
-print(response.first.energy)
-
 
 # Use the solution vector to select the corresponding segments from the event
 solution_segments = [seg for sol, seg in zip(best_sample, segments) if sol == 1]

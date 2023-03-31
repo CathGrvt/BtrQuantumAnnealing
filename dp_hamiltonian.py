@@ -22,6 +22,9 @@ def generate_hamiltonian(event: em.event, params: dict):
 
     N = len(segments)
     A = np.zeros((N, N))
+    A_ang = np.zeros((N, N))
+    A_bif = np.zeros((N, N))
+    
     b = np.zeros(N)
 
     for (i, seg_i), (j, seg_j) in itertools.product(enumerate(segments), repeat=2):
@@ -55,18 +58,19 @@ def generate_hamiltonian(event: em.event, params: dict):
 
 
                     # Define the values for cosine
-                    eps = 1e-9
-
+                    eps = 3.9e-6
                     if np.abs(cosine-1) < eps:
-                        cosine = 1.0
-                        theta = 0.0
-                    else:
-                        theta = np.arccos(cosine)
-                    
+                        A_ang[i,j] += 1
+
+                if (hit_from_i == hit_from_j) and (hit_to_i != hit_to_j):
+                    A_bif[i,j] += -alpha
+                if (hit_from_i != hit_from_j) and (hit_to_i == hit_to_j):
+                    A_bif[i,j] += -alpha
+
 
                     # Add terms to the matrices
-                    A[i, j] = -0.5 * cosine * s_ab * s_bc # / (r_ab + r_bc)
-                    A[j, i] = A[i, j]
+                    #A[i, j] = -0.5 * cosine * s_ab * s_bc  # / (r_ab + r_bc)
+                    #A[j, i] = A[i, j]
                     if r_ac != 0 and r_cb != 0:
                         b[i] += alpha * s_ab * s_bc / (r_ac * r_cb)
                         b[j] += alpha * s_ab * s_bc / (r_ac * r_cb)
@@ -74,9 +78,10 @@ def generate_hamiltonian(event: em.event, params: dict):
 
 
     sum_ab = sum([seg.to_hit.module_id == 1 for seg in segments])
+    A = -1*(A_ang + A_bif)
     A -= beta * (np.sum(A) - N) ** 2 / N ** 2
     b += beta * (np.sum([seg.to_hit.module_id == 1 for seg in segments]) - sum_ab * N / len(segments))
 
-    components = {'A': A}
+    components = {'A_ang': -A_ang,'A_bif': -A_bif}
 
     return A, b, components, segments
