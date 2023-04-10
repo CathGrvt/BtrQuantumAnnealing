@@ -26,7 +26,7 @@ ax.set_title(f"Generated event\n{len(event.modules)} modules\n{len(event.tracks)
 plt.show()
 
 params = {
-    'alpha': 0.1,
+    'alpha': 0.0,
     'beta': 0.0,
     'lambda': 100.0,
 }
@@ -100,11 +100,13 @@ else:
     ax.set_title(f"Solution")
     plt.show()
 
+true_segments = [1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+
 # Calculate Purity and Efficiency
-true_tracks = len(event.tracks)
+true_tracks = len(true_segments)
 reconstructed_tracks = 0
 for track in event.tracks:
-    if all(segment in solution_segments for segment in event.tracks):
+    if all(segment in best_sample for segment in true_segments):
         reconstructed_tracks += 1
 
 purity = reconstructed_tracks / len(solution_segments) if len(solution_segments) > 0 else 0.0

@@ -58,7 +58,17 @@ def generate_hamiltonian(event: em.event, params: dict):
 
 
                     # Define the values for cosine
-                    eps = 3.9e-6
+                    # mp = 938.272 
+                    # beta = np.sqrt(1 - (mp/(mp+10e9))**2)
+                    # p = 200e9  # 200 GeV/c 
+                    # Z = 14 # for silicon 
+                    # x = 200e-6 # 200 micrometers 
+                    # X_0 = 9.36 # cm
+
+                    # eps = (13.6e6/p)/(beta*p) * Z * np.sqrt(x/X_0) * (1 + 0.038 * np.log(x/X_0)) 
+                    
+                    eps = 1.301179605343736e-17
+
                     if np.abs(cosine-1) < eps:
                         A_ang[i,j] += 1
 
