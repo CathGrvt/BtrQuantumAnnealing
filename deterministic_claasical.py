@@ -3,8 +3,6 @@ import dp_hamiltonian as ham
 import numpy as np
 import matplotlib.pyplot as plt
 import dimod
-from dwave.system import DWaveSampler
-from dwave.system import EmbeddingComposite
 
 
 N_MODULES = 3
@@ -66,27 +64,19 @@ for key in components:
 
 fig.colorbar(im, ax=axs.ravel().tolist())
 
-
-# Define the BQM and sampler for simulated annealing
+# Define the BQM and sampler using the ExactSolver
 offset = 0.0
 vartype = dimod.BINARY
 bqm= dimod.BinaryQuadraticModel(b, A, offset, vartype)
+sampler = dimod.ExactSolver()
 
-# Use a D-Wave system as the sampler
-sampler = DWaveSampler() 
+# Run the solver to obtain the exact solution
+solution = sampler.sample(bqm)
 
-print("QPU {} was selected.".format(sampler.solver.name))
-
-
-embedding_sampler = EmbeddingComposite(sampler)
-
-# Run simulated annealing and retrieve the best sample
-sampleset = embedding_sampler.sample(bqm, num_reads=100, label='Notebook - Factoring')
-
-best_sample = sampleset.record.sample[0]
+# Extract the best sample
+best_sample = solution.first.sample
 print(best_sample)
-
-print("Best solution found: \n",sampleset.first.sample)
+print(solution.first.energy)
 
 
 # Use the solution vector to select the corresponding segments from the event
