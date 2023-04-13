@@ -67,7 +67,7 @@ def generate_hamiltonian(event: em.event, params: dict):
 
                     # eps = (13.6e6/p)/(beta*p) * Z * np.sqrt(x/X_0) * (1 + 0.038 * np.log(x/X_0)) 
                     
-                    eps = 1.301179605343736e-17
+                    eps = 1.0e-9 ##1.301179605343736e-17 ### ML here
 
                     if np.abs(cosine-1) < eps:
                         A_ang[i,j] += 1
@@ -89,8 +89,12 @@ def generate_hamiltonian(event: em.event, params: dict):
 
     sum_ab = sum([seg.to_hit.module_id == 1 for seg in segments])
     A = -1*(A_ang + A_bif)
-    A -= beta * (np.sum(A) - N) ** 2 / N ** 2
-    b += beta * (np.sum([seg.to_hit.module_id == 1 for seg in segments]) - sum_ab * N / len(segments))
+    
+    ## A -= beta * (np.sum(A) - N) ** 2 / N ** 2 ## I don't understand this, is is the number of active segments?
+    ## A += beta * (np.sum(A) - N) ** 2 / N ** 2 ## ML changed the sign, it is a penalty term
+    ## b += beta * (np.sum([seg.to_hit.module_id == 1 for seg in segments]) - sum_ab * N / len(segments)) ## I don't really understand, 
+    ## isn't it sum_ab (1 - N) / leng(segments)?
+    b = np.zeros(N)
 
     components = {'A_ang': -A_ang,'A_bif': -A_bif}
 

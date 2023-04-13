@@ -21,16 +21,16 @@ fig = plt.figure()
 fig.set_size_inches(12, 6)
 ax = plt.axes(projection='3d')
 event.display(ax)
-ax.view_init(vertical_axis='y')
+ax.view_init(vertical_axis='y') 
 fig.set_tight_layout(True)
 ax.axis('off')
 ax.set_title(f"Generated event\n{len(event.modules)} modules\n{len(event.tracks)} tracks - {len(event.hits)} hits")
 plt.show()
 
 params = {
-    'alpha': 0.0,
-    'beta': 0.0,
-    'lambda': 100.0,
+    'alpha': 0.5,
+    'beta': 0.5,
+    'lambda': 1.0,
 }
 A, b, components, segments = ham.generate_hamiltonian(event, params)
 
@@ -84,10 +84,9 @@ embedding_sampler = EmbeddingComposite(sampler)
 sampleset = embedding_sampler.sample(bqm, num_reads=100, label='Notebook - Factoring')
 
 best_sample = sampleset.record.sample[0]
-print(best_sample)
 
 print("Best solution found: \n",sampleset.first.sample)
-
+print(list(best_sample))
 
 # Use the solution vector to select the corresponding segments from the event
 solution_segments = [seg for sol, seg in zip(best_sample, segments) if sol == 1]
@@ -112,6 +111,11 @@ else:
     plt.show()
 
 true_segments = [1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+
+##[1 1 0 1 1 0 0 1 0 0 1 1 0 1 0 1 0 0]
+print(true_segments)
+##Best solution found: 
+## {0: 1, 1: 1, 2: 0, 3: 1, 4: 1, 5: 0, 6: 0, 7: 1, 8: 0, 9: 0, 10: 1, 11: 1, 12: 0, 13: 1, 14: 0, 15: 1, 16: 0, 17: 0}
 
 # Calculate Purity and Efficiency
 true_tracks = len(true_segments)

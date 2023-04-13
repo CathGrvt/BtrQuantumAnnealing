@@ -26,8 +26,8 @@ ax.set_title(f"Generated event\n{len(event.modules)} modules\n{len(event.tracks)
 plt.show()
 
 params = {
-    'alpha': 0.0,
-    'beta': 0.0,
+    'alpha': 1000.0,
+    'beta': 1000.0,
     'lambda': 100.0,
 }
 A, b, components, segments = ham.generate_hamiltonian(event, params)
@@ -74,9 +74,9 @@ sampler = dimod.SimulatedAnnealingSampler()
 # Run simulated annealing and retrieve the best sample
 response = sampler.sample(bqm, num_reads=1000)
 best_sample = response.record.sample[0]
-print(best_sample)
-print(response.first.energy)
 
+print(response.first.energy)
+print(list(best_sample))
 
 # Use the solution vector to select the corresponding segments from the event
 solution_segments = [seg for sol, seg in zip(best_sample, segments) if sol == 1]
@@ -101,6 +101,7 @@ else:
     plt.show()
 
 true_segments = [1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+print(true_segments)
 
 # Calculate Purity and Efficiency
 true_tracks = len(true_segments)
