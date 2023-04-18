@@ -26,7 +26,7 @@ ax.set_title(f"Generated event\n{len(event.modules)} modules\n{len(event.tracks)
 plt.show()
 
 params = {
-    'alpha': 0.0,
+    'alpha': 1.0,
     'beta': 0.0,
     'lambda': 100.0,
 }
@@ -64,12 +64,13 @@ for key in components:
 
 fig.colorbar(im, ax=axs.ravel().tolist())
 
+print(components)
+
 # Define the BQM and sampler using the ExactSolver
 offset = 0.0
 vartype = dimod.BINARY
 bqm= dimod.BinaryQuadraticModel(b, A, offset, vartype)
 sampler = dimod.ExactSolver()
-
 # Run the solver to obtain the exact solution
 solution = sampler.sample(bqm)
 
@@ -101,7 +102,7 @@ else:
     ax.set_title(f"Solution")
     plt.show()
 
-true_segments = [1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+true_segments = {0: 1, 1: 0, 2: 0, 3: 0, 4: 1, 5: 0, 6: 0, 7: 0, 8: 1, 9: 1, 10: 0, 11: 0, 12: 0, 13: 1, 14: 0, 15: 0, 16: 0, 17: 1}
 
 # Calculate Purity and Efficiency
 true_tracks = len(true_segments)

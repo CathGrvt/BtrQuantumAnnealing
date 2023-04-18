@@ -26,8 +26,8 @@ ax.set_title(f"Generated event\n{len(event.modules)} modules\n{len(event.tracks)
 plt.show()
 
 params = {
-    'alpha': 0.0,
-    'beta': 0.0,
+    'alpha': 1.0,
+    'beta': 1.0,
     'lambda': 100.0,
 }
 A, b, components, segments = ham.generate_hamiltonian(event, params)
@@ -73,13 +73,14 @@ sampler = dimod.SimulatedAnnealingSampler()
 
 # Run simulated annealing and retrieve the best sample
 response = sampler.sample(bqm, num_reads=1000)
-best_sample = response.record.sample[0]
+best_sample = response.first.sample
 print(best_sample)
+sol_sample = np.array(list(best_sample.values()))
 print(response.first.energy)
 
 
 # Use the solution vector to select the corresponding segments from the event
-solution_segments = [seg for sol, seg in zip(best_sample, segments) if sol == 1]
+solution_segments = [seg for sol, seg in zip(sol_sample, segments) if sol == 1]
 
 # Check if there are any segments in the solution
 if len(solution_segments) == 0:
@@ -100,17 +101,18 @@ else:
     ax.set_title(f"Solution")
     plt.show()
 
-true_segments = [1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+true_segments = {0: 1, 1: 0, 2: 0, 3: 0, 4: 1, 5: 0, 6: 0, 7: 0, 8: 1, 9: 1, 10: 0, 11: 0, 12: 0, 13: 1, 14: 0, 15: 0, 16: 0, 17: 1}
+true_segments = np.array(list(true_segments.values()))
 
 # Calculate Purity and Efficiency
-true_tracks = len(true_segments)
-reconstructed_tracks = 0
-for track in event.tracks:
-    if all(segment in best_sample for segment in true_segments):
-        reconstructed_tracks += 1
 
-purity = reconstructed_tracks / len(solution_segments) if len(solution_segments) > 0 else 0.0
-efficiency = reconstructed_tracks / true_tracks
+reconstructed_segments = 0
+for track in event.tracks:
+    if all(segment in sol_sample for segment in true_segments):
+        reconstructed_segments += 1
+
+purity = reconstructed_segments / len(solution_segments) if len(solution_segments) > 0 else 0.0
+efficiency = reconstructed_segments / 6
 
 # Create bar graphs for Purity and Efficiency
 labels = ['Purity', 'Efficiency']

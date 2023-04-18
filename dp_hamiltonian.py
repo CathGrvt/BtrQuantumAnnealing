@@ -67,7 +67,7 @@ def generate_hamiltonian(event: em.event, params: dict):
 
                     # eps = (13.6e6/p)/(beta*p) * Z * np.sqrt(x/X_0) * (1 + 0.038 * np.log(x/X_0)) 
                     
-                    eps = 1.301179605343736e-17
+                    eps = 1e-9
 
                     if np.abs(cosine-1) < eps:
                         A_ang[i,j] += 1
@@ -81,17 +81,45 @@ def generate_hamiltonian(event: em.event, params: dict):
                     # Add terms to the matrices
                     #A[i, j] = -0.5 * cosine * s_ab * s_bc  # / (r_ab + r_bc)
                     #A[j, i] = A[i, j]
-                    if r_ac != 0 and r_cb != 0:
-                        b[i] += alpha * s_ab * s_bc / (r_ac * r_cb)
-                        b[j] += alpha * s_ab * s_bc / (r_ac * r_cb)
+                    # if r_ac != 0 and r_cb != 0:
+                    #    b[i] += alpha * s_ab * s_bc / (r_ac * r_cb)
+                    #    b[j] += alpha * s_ab * s_bc / (r_ac * r_cb)
 
 
 
-    sum_ab = sum([seg.to_hit.module_id == 1 for seg in segments])
-    A = -1*(A_ang + A_bif)
-    A -= beta * (np.sum(A) - N) ** 2 / N ** 2
-    b += beta * (np.sum([seg.to_hit.module_id == 1 for seg in segments]) - sum_ab * N / len(segments))
+    # sum_ab = sum([seg.to_hit.module_id == 1 for seg in segments])
 
-    components = {'A_ang': -A_ang,'A_bif': -A_bif}
+    # A = -1*(A_ang + A_bif)
+
+    # A += beta * sum_ab * np.sum([seg.from_hit.module_id == 1 for seg in segments])
+    # b += -beta * sum_ab * (1 - N) / len(segments)
+    
+
+    # Define s_ab based on the given application
+    s_ab = np.zeros((N, N))
+    for i, seg_i in enumerate(segments):
+        for j, seg_j in enumerate(segments):
+            s_ab[i][j] = int(seg_i.to_hit.module_id == 1 and seg_j.to_hit.module_id == 1)
+
+    # Compute the quadratic term
+    A_inh = np.zeros((N, N))
+    for i in range(N):
+        for j in range(N):
+            for k in range(N):
+                A_inh[i][j] += s_ab[i][j] * s_ab[j][k]
+    A_inh *= beta
+
+    # Compute the linear term
+    b = np.zeros(N)
+    sum_ab = np.sum([seg.to_hit.module_id == 1 for seg in segments])
+    for i in range(N):
+        b[i] += beta * sum_ab * int(segments[i].from_hit.module_id == 1)
+    b -= beta * sum_ab * (1 - N) / N
+
+    
+    # Compute the final expression
+    A =  -1*(A_ang + A_bif + A_inh)
+
+    components = {'A_ang': -A_ang,'A_bif': -A_bif, 'A_inh': -A_inh}
 
     return A, b, components, segments
