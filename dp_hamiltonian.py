@@ -97,9 +97,11 @@ def generate_hamiltonian(event: em.event, params: dict):
 
     # Define s_ab based on the given application
     s_ab = np.zeros((N, N))
+
     for i, seg_i in enumerate(segments):
         for j, seg_j in enumerate(segments):
-            s_ab[i][j] = int(seg_i.to_hit.module_id == 1 and seg_j.to_hit.module_id == 1)
+            s_ab[i][j] = int(seg_i.from_hit.module_id == 1 and seg_j.to_hit.module_id == 1)
+
 
     # Compute the quadratic term
     A_inh = np.zeros((N, N))
@@ -111,10 +113,9 @@ def generate_hamiltonian(event: em.event, params: dict):
 
     # Compute the linear term
     b = np.zeros(N)
-    sum_ab = np.sum([seg.to_hit.module_id == 1 for seg in segments])
     for i in range(N):
-        b[i] += beta * sum_ab * int(segments[i].from_hit.module_id == 1)
-    b -= beta * sum_ab * (1 - N) / N
+        for j in range(N):
+            b[i] -= beta * N * s_ab[i][j]
 
     
     # Compute the final expression
