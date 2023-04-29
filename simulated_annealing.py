@@ -1,4 +1,4 @@
-import toymodel_3d as toy
+import toymodel_3d_scat as toy
 import dp_hamiltonian as ham
 import numpy as np
 import matplotlib.pyplot as plt
@@ -78,6 +78,7 @@ print(best_sample)
 sol_sample = np.array(list(best_sample.values()))
 print(response.first.energy)
 
+print(components)
 
 # Use the solution vector to select the corresponding segments from the event
 solution_segments = [seg for sol, seg in zip(sol_sample, segments) if sol == 1]
