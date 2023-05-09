@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import dimod
 
 
-N_MODULES = 3
-N_TRACKS = 3
+N_MODULES = 4
+N_TRACKS = 10
 
 LX = 2
 LY = 2
@@ -77,8 +77,6 @@ best_sample = response.first.sample
 print(best_sample)
 sol_sample = np.array(list(best_sample.values()))
 print(response.first.energy)
-
-print(components)
 
 # Use the solution vector to select the corresponding segments from the event
 solution_segments = [seg for sol, seg in zip(sol_sample, segments) if sol == 1]

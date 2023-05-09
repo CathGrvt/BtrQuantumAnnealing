@@ -112,10 +112,10 @@ def generate_hamiltonian(event: em.event, params: dict):
     A_inh *= beta
 
     # Compute the linear term
-    b = np.zeros(N)
-    for i in range(N):
-        for j in range(N):
-            b[i] -= beta * N * s_ab[i][j]
+    # b = np.zeros(N)
+    # for i in range(N):
+    #     for j in range(N):
+    #         b[i] -= beta * N * s_ab[i][j]
 
     
     # Compute the final expression

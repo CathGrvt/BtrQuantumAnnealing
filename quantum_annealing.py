@@ -83,14 +83,17 @@ embedding_sampler = EmbeddingComposite(sampler)
 # Run simulated annealing and retrieve the best sample
 sampleset = embedding_sampler.sample(bqm, num_reads=100, label='Notebook - Factoring')
 
-best_sample = sampleset.record.sample[0]
+best_sample = sampleset.first.sample
 print(best_sample)
+
+sol_sample = np.array(list(best_sample.values()))
+print(sampleset.first.energy)
 
 print("Best solution found: \n",sampleset.first.sample)
 
 
 # Use the solution vector to select the corresponding segments from the event
-solution_segments = [seg for sol, seg in zip(best_sample, segments) if sol == 1]
+solution_segments = [seg for sol, seg in zip(sol_sample, segments) if sol == 1]
 
 # Check if there are any segments in the solution
 if len(solution_segments) == 0:
@@ -110,26 +113,3 @@ else:
     ax.axis('off')
     ax.set_title(f"Solution")
     plt.show()
-
-true_segments = [1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1]
-
-# Calculate Purity and Efficiency
-true_tracks = len(true_segments)
-reconstructed_tracks = 0
-for track in event.tracks:
-    if all(segment in best_sample for segment in true_segments):
-        reconstructed_tracks += 1
-
-purity = reconstructed_tracks / len(solution_segments) if len(solution_segments) > 0 else 0.0
-efficiency = reconstructed_tracks / true_tracks
-
-# Create bar graphs for Purity and Efficiency
-labels = ['Purity', 'Efficiency']
-values = [purity, efficiency]
-
-fig, ax = plt.subplots()
-ax.bar(labels, values)
-ax.set_ylim([0, 1])
-ax.set_ylabel('Value')
-ax.set_title('Purity and Efficiency')
-plt.show()

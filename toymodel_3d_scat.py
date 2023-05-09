@@ -14,7 +14,7 @@ def generate_simple_detector(n_modules, lx, ly, spacing):
     return [{'module_id': i, 'z': spacing*(i+1), 'lx': lx, 'ly':ly} for i in range(n_modules)]
 
 
-def generate_event(geometry, N_tracks, primary_vertex_iter=itertools.repeat((0.0,0.0,0.0)),phi_min = 0, phi_max = 2*np.pi, theta_min = 0, theta_max=np.pi/10, seed=None, ms_angle=7.1e-6):
+def generate_event(geometry, N_tracks, primary_vertex_iter=itertools.repeat((0.0,0.0,0.0)),phi_min = 0, phi_max = 2*np.pi, theta_min = 0, theta_max=np.pi/10, seed=None, ms_angle=2.75e-4):
 
     hit_id_counter = itertools.count()
     rng = np.random.default_rng(seed)
